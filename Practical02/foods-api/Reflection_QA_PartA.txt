@@ -1,0 +1,21 @@
+Reflection:
+I really enjoyed learning about REST APIs in this lab. Before this,
+I was confused about how APIs actually work, but now I understand that
+it's just about using HTTP methods to interact with data.
+Working with Express made it clearer how servers handle different types of requests.
+I struggled a bit with understanding the difference between query parameters
+and route parameters at first, but the food filtering example helped it click for me.
+
+Q&A:
+1. Why use POST for creating resources and PUT for updating?
+POST is used for creating new stuff because it's meant for sending data that
+will make something new on the server. You can send the same POST request
+multiple times and it will create multiple copies. PUT is better for updates
+because it replaces existing data completely and sending the same PUT request
+multiple times won't keep creating new copies, it just updates the same resource
+to the same state each time.
+
+2. What status code should be returned when attempting to update a non-existent resource?
+A 404 status code should be returned when trying to update something that doesn't exist.
+This makes sense because the server is basically saying "I can't find what you're trying to update."
+We did this in our code when we checked if the food with a specific ID exists before updating it.
