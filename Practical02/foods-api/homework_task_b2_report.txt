@@ -1,0 +1,56 @@
+## Role of Express.js Elements in foods-api
+
+**app.use(express.json())**
+This middleware parses incoming JSON requests and puts the data into req.body so we can access it.
+Without this line, our server wouldn't understand JSON data sent in POST or PUT requests,
+and req.body would be undefined when trying to create or update foods.
+
+**req.body**
+This contains the data sent in the request body, which we use when creating or updating foods.
+For example, when a user sends a POST request with food details like name and calories,
+we access them through req.body.name and req.body.calories.
+
+**req.query**
+These are the parameters that come after the '?' in a URL. We use req.query to get optional filters,
+like when a user wants to search for foods by name (GET /foods?name=App).
+It helps make our API more flexible without needing separate endpoints.
+
+**req.params.id**
+This accesses route parameters in the URL path. We use it to get the food ID for update and
+delete operations. When someone sends a request to /foods/123, we can get the ID '123' using
+req.params.id to know which food to update or delete.
+
+
+## Significance of HTTP Methods
+
+Different HTTP methods let us implement CRUD operations in a standardized way:
+
+- **GET**: Used for Read operations, retrieves data without modifying it (like our GET /foods endpoint)
+- **POST**: Used for Create operations, adds new resources to the database (like our POST /foods endpoint)
+- **PUT**: Used for Update operations, replaces existing resources (like our PUT /foods/:id endpoint)
+- **DELETE**: Used for Delete operations, removes resources (like our DELETE /foods/:id endpoint)
+Using these standard methods makes our API more intuitive for other developers to use since they
+follow common REST patterns.
+
+## HTTP Status Codes
+
+**200 OK**
+This means the request succeeded. We return this for successful GET, PUT, and DELETE operations,
+like when foods are successfully retrieved, updated, or deleted.
+
+**201 Created**
+This means a new resource was successfully created. We return this specifically after a
+successful POST request when a new food is added to our database.
+
+**400 Bad Request**
+This indicates a client error, the request was invalid or missing required data. We return this
+when users try to create or update a food without providing both name and calories.
+
+**404 Not Found**
+This means the requested resource doesn't exist. We return this when a user tries to update or
+delete a food with an ID that doesn't exist in our database.
+
+**500 Internal Server Error**
+This indicates something went wrong on the server side. We don't explicitly return this in
+our code, but Express will automatically send it if our code throws an uncaught exception.
+This would happen if, for example, we had a programming error or our database connection failed.
