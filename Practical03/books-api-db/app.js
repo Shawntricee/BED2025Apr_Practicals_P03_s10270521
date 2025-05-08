@@ -108,6 +108,103 @@ app.post("/books", async (req, res) => {
   }
 });
 
+// --- PUT Route ---
+
+// PUT update book by ID
+app.put("/books/:id", async (req, res) => {
+  const bookId = parseInt(req.params.id);
+  if (isNaN(bookId)) {
+    return res.status(400).send("Invalid book ID");
+  }
+  
+  const updatedBookData = req.body;
+  
+  let connection;
+  try {
+    connection = await sql.connect(dbConfig);
+    
+    // Update the book in the database
+    const updateQuery = `
+      UPDATE Books 
+      SET title = @title, author = @author 
+      WHERE id = @id
+    `;
+    
+    const request = connection.request();
+    request.input("id", bookId);
+    request.input("title", updatedBookData.title);
+    request.input("author", updatedBookData.author);
+    
+    const result = await request.query(updateQuery);
+    
+    // Check if a book was actually updated
+    if (result.rowsAffected[0] === 0) {
+      return res.status(404).send("Book not found");
+    }
+    
+    // Fetch the updated book to return it
+    const getUpdatedBookQuery = `SELECT id, title, author FROM Books WHERE id = @id`;
+    const getBookRequest = connection.request();
+    getBookRequest.input("id", bookId);
+    const updatedBook = await getBookRequest.query(getUpdatedBookQuery);
+    
+    res.json(updatedBook.recordset[0]);
+  } catch (error) {
+    console.error(`Error in PUT /books/${bookId}:`, error);
+    res.status(500).send("Error updating book");
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (closeError) {
+        console.error("Error closing database connection:", closeError);
+      }
+    }
+  }
+});
+
+// --- DELETE Route ---
+
+// DELETE book by ID
+app.delete("/books/:id", async (req, res) => {
+  const bookId = parseInt(req.params.id);
+  if (isNaN(bookId)) {
+    return res.status(400).send("Invalid book ID");
+  }
+  
+  let connection;
+  try {
+    connection = await sql.connect(dbConfig);
+    
+    // Delete the book from the database
+    const deleteQuery = `DELETE FROM Books WHERE id = @id`;
+    
+    const request = connection.request();
+    request.input("id", bookId);
+    
+    const result = await request.query(deleteQuery);
+    
+    // Check if a book was actually deleted
+    if (result.rowsAffected[0] === 0) {
+      return res.status(404).send("Book not found");
+    }
+    
+    // Return 204 No Content on successful deletion
+    res.status(204).send();
+  } catch (error) {
+    console.error(`Error in DELETE /books/${bookId}:`, error);
+    res.status(500).send("Error deleting book");
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (closeError) {
+        console.error("Error closing database connection:", closeError);
+      }
+    }
+  }
+});
+
 // Start the server
 app.listen(port, async () => {
   try {
