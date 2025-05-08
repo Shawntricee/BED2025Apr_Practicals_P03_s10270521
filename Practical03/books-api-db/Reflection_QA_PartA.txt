@@ -1,0 +1,14 @@
+Reflection:
+Working on this lab, I found that placing all the database logic directly in route
+handlers makes the code difficult to read and understand. Each route handler contains
+not just the API logic but also database connection management, SQL queries, and error handling,
+making them very long and complex.
+
+If I found a bug in how books are created, it would be challenging to isolate and fix
+because the database logic is embedded in the route handlers. I'd need to be careful
+that my fix doesn't break other functionality within the same handler.
+
+During implementation, I found managing database connections for each route to be repetitive and
+error-prone. I had to make sure each route properly closes connections in all scenarios,
+which adds complexity. This approach would be difficult to maintain in a larger application
+with more routes and database operations.
