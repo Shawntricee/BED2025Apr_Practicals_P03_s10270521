@@ -1,0 +1,156 @@
+## Task 1: Reflection on Refactoring
+
+### 1. Main changes made to refactor the code into MVC architecture
+
+When refactoring the code into MVC architecture, I made these key changes:
+
+- **Created a folder structure** with separate directories for models, controllers, and middlewares
+- **Extracted database operations** from app.js into bookModel.js
+- **Moved request handling logic** into bookController.js
+- **Implemented validation** in a separate middleware file
+- **Simplified app.js** to focus on server setup and routes
+
+The main code movement involved taking the SQL queries that were originally in route handlers
+and moving them to model functions, then creating controller functions that call these model
+functions and handle HTTP responses.
+
+### 2. Challenges faced during the refactoring process
+
+During refactoring, I encountered several challenges:
+
+- **Understanding the proper separation of concerns** - deciding what code belongs in models
+vs controllers
+- **Managing connections** properly in each model function to prevent leaks
+- **Error handling** across different layers of the application
+- **Ensuring data flows correctly** between the layers (request → controller → model → database
+and back)
+- **Testing thoroughly** to make sure the refactored code maintained the original functionality
+
+### 3. How MVC structure changes thinking about features
+
+With MVC, adding new features requires thinking about:
+
+- What database operations are needed (Model)
+- How to handle HTTP requests and responses (Controller)
+- What validation is needed (Middleware)
+
+This is different from the non-MVC approach where I would just add a new route with all
+logic inside. MVC forces me to think about each component separately, making the code more
+organized even as it grows.
+
+### 4. Ways MVC is more organized than having all logic in app.js
+
+The MVC version is more organized because:
+
+- **Single responsibility** - each file has a clear purpose
+- **Easier to locate code** - I know exactly where to find database operations (model),
+route handlers (controller), or validation logic (middleware)
+- **Reduced file size** - smaller files are easier to read and understand
+- **Better reusability** - model functions can be reused across different controllers
+- **Easier testing** - components can be tested independently
+
+### 5. Benefits of separating concerns from a development perspective
+
+Separating database logic (Model) from request handling (Controller):
+
+- **Enables specialized development** - one developer can work on the model while another
+works on the controller
+- **Simplifies debugging** - issues are isolated to specific components
+- **Makes code more maintainable** - changes to database operations don't affect request
+handling and vice versa
+- **Improves code reuse** - the same model function can be used by multiple controllers
+- **Allows for easier database changes** - if we change from SQL Server to MongoDB, we only
+need to modify the model layer
+
+## Task 2: Reflecting on Robustness & Security
+
+### 1. How input validation middleware improves reliability and user-friendliness
+
+Input validation middleware makes the API more reliable by:
+
+- **Preventing invalid data** from reaching the database
+- **Providing clear error messages** to users
+- **Standardizing validation** across all routes
+- **Reducing error handling code** in controllers
+
+For example, without validation, a user could submit a book with an empty title or
+author field that might break database constraints. With our validation middleware,
+we catch this early with a helpful message like "Title cannot be empty" instead of a
+cryptic database error.
+
+### 2. How parameterized queries prevent SQL injection attacks
+
+Parameterized queries prevent SQL injection by:
+
+- **Separating SQL code from data** - the database treats parameters as data, not executable code
+- **Handling special characters automatically** - the database driver escapes or properly
+formats input data
+- **Preventing query structure modification** - attackers can't change the intended query's
+structure
+
+This is more secure than string concatenation because with concatenation, user input becomes
+part of the SQL command itself. For example, if we build a query like:
+const query = "SELECT * FROM Books WHERE id = " + userInput;
+
+An attacker could enter "1; DROP TABLE Books; --" as userInput, resulting in:
+SELECT * FROM Books WHERE id = 1; DROP TABLE Books; --
+
+With parameterized queries, we instead use:
+request.input("id", id);
+const query = "SELECT * FROM Books WHERE id = @id";
+
+Here, even malicious input is treated as a parameter value, not as SQL code to execute.
+
+### 3. How robust error handling helps mitigate security risks
+
+Robust error handling helps mitigate security risks beyond SQL injection by:
+
+- **Preventing information leakage** - generic error messages don't reveal database structure
+or server details
+- **Maintaining a consistent interface** - errors don't expose implementation details
+- **Logging errors server-side** - we can track potential attacks without informing attackers
+- **Preventing application crashes** - caught errors don't bring down the server
+
+For example, if someone is trying to enumerate users by requesting /api/users/1, /api/users/2, etc.,
+detailed errors might reveal which IDs exist. With robust error handling, we provide a generic
+"User not found" response rather than specific database errors that could aid an attacker.
+
+## Task 3: Applying Concepts / Exploration
+
+### Research Security Practice: Implementing Rate Limiting
+
+Rate limiting is a security practice that restricts how many requests a user can make within a
+certain time period. This is important for APIs because:
+
+1. **Prevents abuse** - stops attackers from overwhelming the server with requests
+2. **Protects resources** - prevents one user from consuming excessive server resources
+3. **Reduces impact of brute force attacks** - makes password guessing much slower
+4. **Mitigates DDoS attacks** - limits the effect of distributed attacks
+
+To implement rate limiting in an Express API, I would:
+
+1. Install the express-rate-limit package:
+npm install express-rate-limit
+
+2. Add rate limiting middleware to app.js:
+const rateLimit = require('express-rate-limit');
+
+// Basic rate limiter - 100 requests per 15 minutes per IP
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  standardHeaders: true, // Return rate limit info in the standard headers
+  legacyHeaders: false, // Disable the X-RateLimit-* headers
+  message: 'Too many requests from this IP, please try again after 15 minutes'
+});
+
+// Apply to all routes
+app.use(apiLimiter);
+
+// Or apply to specific routes
+app.use('/books', apiLimiter);
+
+This implementation would track requests by IP address and return a 429 (Too Many Requests)
+status code when a client exceeds the limit. For more security, I could use different rate
+limits for different routes, especially protecting authentication endpoints with stricter
+limits to prevent brute force attacks.
