@@ -1,0 +1,123 @@
+# Practical 05: Homework Reflection
+
+## Task 2: Reflection and Review
+
+### 1. Separation of Concerns
+
+**Distinct responsibilities of Model, View, and Controller:**
+
+**Model (e.g., studentModel.js):**
+- Handles all database operations (CREATE, READ, UPDATE, DELETE)
+- Manages data validation at the database level
+- Contains the business logic for data manipulation
+- Provides clean interface for controllers to access data
+
+**View (HTML/CSS/JavaScript frontend):**
+- Presents data to the user in a readable format
+- Handles user interactions (forms, buttons, clicks)
+- Manages the user interface and user experience
+- Sends requests to the backend API and displays responses
+
+**Controller (e.g., studentController.js):**
+- Acts as intermediary between Model and View
+- Processes HTTP requests and determines appropriate responses
+- Calls the correct Model functions based on the request
+- Formats data for the View and handles HTTP status codes
+
+**How separate frontend View simplifies backend responsibilities:**
+
+With a separate frontend, the backend API becomes much simpler because:
+- It only needs to handle data operations, not HTML rendering
+- Each endpoint has a single responsibility (return JSON data)
+- The API can be used by multiple frontends (web, mobile, etc.)
+- Frontend and backend can be developed and updated independently
+- Easier to test each layer separately
+
+### 2. Robustness and Security
+
+**When it became easier to identify and fix bugs:**
+
+Bug identification became much easier in **Practical 04** when we implemented the MVC
+structure because:
+
+- **Separation of concerns** made it clear where problems originated
+- If there was a data issue, I knew to check the Model
+- If there was a request handling issue, I checked the Controller
+- Validation errors were isolated in the middleware
+- Each component could be tested independently
+
+In Practical 03, everything was mixed together in route handlers, making it difficult to
+isolate issues. With MVC, when something broke, I could quickly identify which layer was responsible.
+
+### 3. Challenges and Problem Solving
+
+**Most challenging aspect across all practicals:**
+
+The most challenging aspect for me was **understanding asynchronous JavaScript and API
+communication** in Practical 05.
+
+**The Problem:**
+- Managing async/await syntax correctly
+- Handling different HTTP status codes properly
+- Understanding how fetch() works with JSON data
+- Coordinating frontend-backend communication
+
+**How I approached solving it:**
+- Used console.log() extensively to debug API calls
+- Used browser developer tools to inspect network requests
+- Started with simple GET requests before moving to POST/PUT/DELETE
+- Tested each function individually before combining them
+- Referred back to the Books API examples when stuck
+
+**Adding new features with current MVC structure:**
+
+If I had to add a "genre" field to books or user authentication, the MVC structure would
+help because:
+
+1. **Model Layer:** I'd update the database schema and model functions
+2. **Controller Layer:** I'd modify controllers to handle the new field/feature
+3. **View Layer:** I'd update forms and displays for the new functionality
+4. **Middleware:** I'd add validation for new fields
+
+This is much more organized than Practical 03 where I'd have to modify route handlers
+that mixed all these concerns together.
+
+### 4. Experiential Learning
+
+**How hands-on coding helped understand concepts:**
+
+**MVC Architecture:**
+- Reading about MVC was abstract, but actually separating my code into folders and files made
+the concept concrete
+- I could see how each piece had a specific job and how they worked together
+
+**Validation:**
+- Implementing Joi validation showed me how important it is to validate data before it reaches
+the database
+- I experienced firsthand how validation prevents bad data and provides useful error messages
+
+**Error Handling:**
+- Writing try-catch blocks and handling different HTTP status codes taught me how robust
+applications handle failures gracefully
+- I learned the difference between client errors (400s) and server errors (500s)
+
+**Parameterized Queries:**
+- Actually implementing SQL injection protection made me understand why string concatenation
+is dangerous
+- Using parameterized queries showed me how to separate code from data
+
+**Frontend-Backend Communication:**
+- Making actual HTTP requests helped me understand how web applications really work
+- Debugging network issues taught me about headers, status codes, and data formats
+
+The hands-on experience was essential because it forced me to deal with real problems like
+network failures, validation errors, and debugging, things you can't learn just by reading
+about them.
+
+## Conclusion
+
+The progression from Practical 03 to 05 showed me how software architecture evolves from simple
+scripts to professional applications. Each practical built on the previous one, adding layers of
+organization, security, and functionality. The MVC pattern and separation of concerns aren't just
+academic concepts, they're practical tools that make development faster, debugging easier,
+and maintenance more manageable.

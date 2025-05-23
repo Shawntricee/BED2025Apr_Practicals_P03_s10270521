@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create New Student</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .header h1 {
+        color: #007bff;
+        margin-bottom: 10px;
+      }
+      .nav-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #007bff;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .nav-link:hover {
+        text-decoration: underline;
+      }
+      form div {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #333;
+      }
+      input[type="text"], 
+      input[type="email"], 
+      input[type="number"] {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+        box-sizing: border-box;
+      }
+      input:focus {
+        border-color: #007bff;
+        outline: none;
+      }
+      button {
+        width: 100%;
+        padding: 12px 20px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      button:hover {
+        background-color: #218838;
+      }
+      #message {
+        margin-top: 20px;
+        font-weight: bold;
+        padding: 12px;
+        border-radius: 4px;
+        text-align: center;
+      }
+      .form-group {
+        position: relative;
+      }
+      .required {
+        color: #dc3545;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Create New Student</h1>
+        <p>Add a new student to the system</p>
+      </div>
+      
+      <a href="students.html" class="nav-link">← Back to Students List</a>
+
+      <form id="createStudentForm">
+        <div class="form-group">
+          <label for="name">Full Name <span class="required">*</span></label>
+          <input type="text" id="name" name="name" required placeholder="Enter student's full name" />
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email Address <span class="required">*</span></label>
+          <input type="email" id="email" name="email" required placeholder="Enter student's email" />
+        </div>
+        
+        <div class="form-group">
+          <label for="age">Age <span class="required">*</span></label>
+          <input type="number" id="age" name="age" required min="16" max="100" placeholder="Enter student's age" />
+        </div>
+        
+        <button type="submit">Create Student</button>
+      </form>
+
+      <div id="message"></div>
+    </div>
+
+    <script src="create-student.js"></script>
+  </body>
+</html>

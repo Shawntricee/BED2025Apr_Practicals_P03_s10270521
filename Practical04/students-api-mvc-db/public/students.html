@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Students List</title>
+    <link rel="stylesheet" href="main.css">
+  </head>
+  <body>
+    <div class="header">
+      <h1>Students Management System</h1>
+      <p>Manage student records with full CRUD operations</p>
+    </div>
+
+    <div class="controls">
+      <a href="create-student.html" class="btn btn-success">Add New Student</a>
+      <button id="fetchStudentsBtn" class="btn btn-primary">Refresh Students List</button>
+    </div>
+
+    <div id="message"></div>
+    <div id="studentsList" class="loading">Loading students...</div>
+
+    <script src="students.js"></script>
+  </body>
+</html>
