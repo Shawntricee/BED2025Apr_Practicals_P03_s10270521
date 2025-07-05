@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Polytechnic Library</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 User Registration</h1>
+            <p>Create your library account</p>
+        </div>
+
+        <div class="nav">
+            <a href="index.html">← Back to Home</a>
+            <a href="login.html">Already have an account? Login</a>
+        </div>
+
+        <div class="card">
+            <h2>Register New Account</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required 
+                           placeholder="Enter your username (min 3 characters)">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required 
+                           placeholder="Enter your password (min 6 characters)">
+                </div>
+
+                <div class="form-group">
+                    <label for="role">Account Type:</label>
+                    <select id="role" name="role" required>
+                        <option value="">Select account type</option>
+                        <option value="member">Student/Member</option>
+                        <option value="librarian">Librarian</option>
+                    </select>
+                </div>
+
+                <button type="submit">Register Account</button>
+            </form>
+
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                role: document.getElementById('role').value
+            };
+
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = '<div class="message info">Creating account...</div>';
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.innerHTML = `<div class="message success">✅ ${data.message} - <a href="login.html">Login now</a></div>`;
+                    document.getElementById('registerForm').reset();
+                } else {
+                    messageDiv.innerHTML = `<div class="message error">❌ ${data.error || data.message}</div>`;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="message error">❌ Network error: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>

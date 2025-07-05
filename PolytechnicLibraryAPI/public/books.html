@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Books - Polytechnic Library</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Library Books</h1>
+            <p>Browse and manage library collection</p>
+        </div>
+
+        <div class="nav">
+            <a href="index.html">Home</a>
+            <a href="admin.html">Admin Panel</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+
+        <div id="userInfo" class="user-info hidden">
+            <strong>Logged in as:</strong> <span id="currentUser"></span> 
+            (<span id="currentRole"></span>)
+        </div>
+
+        <div class="card">
+            <h2>All Books</h2>
+            <button onclick="loadBooks()" class="success">🔄 Refresh Books</button>
+            <div id="message"></div>
+            <div id="booksContainer">
+                <div class="message info">Click "Refresh Books" to load the library collection</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let authToken = null;
+
+        // Check authentication on page load
+        window.addEventListener('load', () => {
+            authToken = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            
+            if (!authToken || !userStr) {
+                document.getElementById('message').innerHTML = 
+                    '<div class="message error">❌ Please <a href="login.html">login</a> to view books</div>';
+                return;
+            }
+
+            currentUser = JSON.parse(userStr);
+            document.getElementById('userInfo').classList.remove('hidden');
+            document.getElementById('currentUser').textContent = currentUser.username;
+            document.getElementById('currentRole').textContent = currentUser.role;
+            
+            // Auto-load books
+            loadBooks();
+        });
+
+        async function loadBooks() {
+            if (!authToken) {
+                document.getElementById('message').innerHTML = 
+                    '<div class="message error">❌ Authentication required</div>';
+                return;
+            }
+
+            const messageDiv = document.getElementById('message');
+            const container = document.getElementById('booksContainer');
+            
+            messageDiv.innerHTML = '<div class="message info">Loading books...</div>';
+
+            try {
+                const response = await fetch('/books', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.innerHTML = '<div class="message success">✅ Books loaded successfully</div>';
+                    displayBooks(data);
+                } else {
+                    messageDiv.innerHTML = `<div class="message error">❌ ${data.message || data.error}</div>`;
+                    if (response.status === 401 || response.status === 403) {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        setTimeout(() => window.location.href = 'login.html', 2000);
+                    }
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="message error">❌ Network error: ${error.message}</div>`;
+            }
+        }
+
+        function displayBooks(books) {
+            const container = document.getElementById('booksContainer');
+            
+            if (books.length === 0) {
+                container.innerHTML = '<div class="message info">No books found in the library</div>';
+                return;
+            }
+
+            let html = '';
+            books.forEach(book => {
+                const availabilityClass = book.availability === 'Y' ? 'availability-y' : 'availability-n';
+                const availabilityText = book.availability === 'Y' ? 'Available' : 'Not Available';
+                
+                html += `
+                    <div class="book-item">
+                        <h4>${book.title}</h4>
+                        <div class="book-info">
+                            <p><strong>Author:</strong> ${book.author}</p>
+                            <p><strong>Book ID:</strong> ${book.book_id}</p>
+                            <p><strong>Status:</strong> <span class="${availabilityClass}">${availabilityText}</span></p>
+                        </div>
+                `;
+
+                // Show availability controls only for librarians
+                if (currentUser && currentUser.role === 'librarian') {
+                    html += `
+                        <div class="book-actions">
+                            <button onclick="updateAvailability(${book.book_id}, 'Y')" 
+                                    ${book.availability === 'Y' ? 'disabled' : ''} 
+                                    class="success">Mark Available</button>
+                            <button onclick="updateAvailability(${book.book_id}, 'N')" 
+                                    ${book.availability === 'N' ? 'disabled' : ''} 
+                                    class="danger">Mark Unavailable</button>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        async function updateAvailability(bookId, availability) {
+            if (!authToken || currentUser.role !== 'librarian') {
+                document.getElementById('message').innerHTML = 
+                    '<div class="message error">❌ Only librarians can update book availability</div>';
+                return;
+            }
+
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = '<div class="message info">Updating book availability...</div>';
+
+            try {
+                const response = await fetch(`/books/${bookId}/availability`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ availability })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.innerHTML = '<div class="message success">✅ Book availability updated successfully</div>';
+                    loadBooks(); // Refresh the books list
+                } else {
+                    messageDiv.innerHTML = `<div class="message error">❌ ${data.error || data.message}</div>`;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="message error">❌ Network error: ${error.message}</div>`;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

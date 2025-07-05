@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Polytechnic Library</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚙️ Admin Panel</h1>
+            <p>Librarian Management Dashboard</p>
+        </div>
+
+        <div class="nav">
+            <a href="index.html">Home</a>
+            <a href="books.html">← Back to Books</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+
+        <div id="userInfo" class="user-info hidden">
+            <strong>Logged in as:</strong> <span id="currentUser"></span> 
+            (<span id="currentRole"></span>)
+        </div>
+
+        <div id="accessDenied" class="card hidden">
+            <div class="message error">
+                ❌ Access Denied: Only librarians can access this panel.
+                <br><a href="login.html">Login as librarian</a> | <a href="books.html">Go to Books</a>
+            </div>
+        </div>
+
+        <div id="adminContent" class="hidden">
+            <div class="card">
+                <h2>📊 System Statistics</h2>
+                <button onclick="loadStats()" class="success">Load Statistics</button>
+                <div id="statsContainer"></div>
+            </div>
+
+            <div class="card">
+                <h2>📚 Book Management</h2>
+                <button onclick="loadBooksForAdmin()" class="success">Load All Books</button>
+                <div id="message"></div>
+                <div id="adminBooksContainer"></div>
+            </div>
+
+            <div class="card">
+                <h2>🔧 Quick Actions</h2>
+                <button onclick="markAllAvailable()" class="success">Mark All Books Available</button>
+                <button onclick="markAllUnavailable()" class="danger">Mark All Books Unavailable</button>
+                <div id="actionMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let authToken = null;
+        let allBooks = [];
+
+        // Check authentication and authorization on page load
+        window.addEventListener('load', () => {
+            authToken = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            
+            if (!authToken || !userStr) {
+                document.getElementById('accessDenied').classList.remove('hidden');
+                return;
+            }
+
+            currentUser = JSON.parse(userStr);
+            document.getElementById('userInfo').classList.remove('hidden');
+            document.getElementById('currentUser').textContent = currentUser.username;
+            document.getElementById('currentRole').textContent = currentUser.role;
+
+            if (currentUser.role !== 'librarian') {
+                document.getElementById('accessDenied').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('adminContent').classList.remove('hidden');
+            loadBooksForAdmin();
+        });
+
+        async function loadStats() {
+            const container = document.getElementById('statsContainer');
+            container.innerHTML = '<div class="message info">Loading statistics...</div>';
+
+            try {
+                const response = await fetch('/books', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const books = await response.json();
+                    const available = books.filter(book => book.availability === 'Y').length;
+                    const unavailable = books.filter(book => book.availability === 'N').length;
+                    
+                    container.innerHTML = `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                            <div style="background: #e8f5e8; padding: 15px; border-radius: 5px; text-align: center;">
+                                <h3>📚 Total Books</h3>
+                                <p style="font-size: 24px; font-weight: bold; color: #007bff;">${books.length}</p>
+                            </div>
+                            <div style="background: #e8f8e8; padding: 15px; border-radius: 5px; text-align: center;">
+                                <h3>✅ Available</h3>
+                                <p style="font-size: 24px; font-weight: bold; color: #28a745;">${available}</p>
+                            </div>
+                            <div style="background: #ffe8e8; padding: 15px; border-radius: 5px; text-align: center;">
+                                <h3>❌ Unavailable</h3>
+                                <p style="font-size: 24px; font-weight: bold; color: #dc3545;">${unavailable}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = '<div class="message error">❌ Failed to load statistics</div>';
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="message error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadBooksForAdmin() {
+            const messageDiv = document.getElementById('message');
+            const container = document.getElementById('adminBooksContainer');
+            
+            messageDiv.innerHTML = '<div class="message info">Loading books for admin...</div>';
+
+            try {
+                const response = await fetch('/books', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    allBooks = data;
+                    messageDiv.innerHTML = '<div class="message success">✅ Books loaded successfully</div>';
+                    displayAdminBooks(data);
+                } else {
+                    messageDiv.innerHTML = `<div class="message error">❌ ${data.message || data.error}</div>`;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="message error">❌ Network error: ${error.message}</div>`;
+            }
+        }
+
+        function displayAdminBooks(books) {
+            const container = document.getElementById('adminBooksContainer');
+            
+            if (books.length === 0) {
+                container.innerHTML = '<div class="message info">No books found</div>';
+                return;
+            }
+
+            let html = '<div style="margin-top: 15px;">';
+            books.forEach(book => {
+                const availabilityClass = book.availability === 'Y' ? 'availability-y' : 'availability-n';
+                const availabilityText = book.availability === 'Y' ? 'Available' : 'Not Available';
+                
+                html += `
+                    <div class="book-item">
+                        <h4>${book.title}</h4>
+                        <div class="book-info">
+                            <p><strong>Author:</strong> ${book.author}</p>
+                            <p><strong>Book ID:</strong> ${book.book_id}</p>
+                            <p><strong>Status:</strong> <span class="${availabilityClass}">${availabilityText}</span></p>
+                        </div>
+                        <div class="book-actions">
+                            <button onclick="updateBookAvailability(${book.book_id}, 'Y')" 
+                                    ${book.availability === 'Y' ? 'disabled' : ''} 
+                                    class="success">✅ Available</button>
+                            <button onclick="updateBookAvailability(${book.book_id}, 'N')" 
+                                    ${book.availability === 'N' ? 'disabled' : ''} 
+                                    class="danger">❌ Unavailable</button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            container.innerHTML = html;
+        }
+
+        async function updateBookAvailability(bookId, availability) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = '<div class="message info">Updating book availability...</div>';
+
+            try {
+                const response = await fetch(`/books/${bookId}/availability`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ availability })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.innerHTML = '<div class="message success">✅ Book availability updated</div>';
+                    loadBooksForAdmin(); // Refresh
+                    loadStats(); // Update stats if loaded
+                } else {
+                    messageDiv.innerHTML = `<div class="message error">❌ ${data.error}</div>`;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="message error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function markAllAvailable() {
+            if (!confirm('Mark ALL books as available?')) return;
+            await bulkUpdateAvailability('Y');
+        }
+
+        async function markAllUnavailable() {
+            if (!confirm('Mark ALL books as unavailable?')) return;
+            await bulkUpdateAvailability('N');
+        }
+
+        async function bulkUpdateAvailability(availability) {
+            const actionDiv = document.getElementById('actionMessage');
+            actionDiv.innerHTML = '<div class="message info">Updating all books...</div>';
+
+            try {
+                const promises = allBooks.map(book => 
+                    fetch(`/books/${book.book_id}/availability`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ availability })
+                    })
+                );
+
+                await Promise.all(promises);
+                actionDiv.innerHTML = '<div class="message success">✅ All books updated successfully</div>';
+                loadBooksForAdmin(); // Refresh
+                loadStats(); // Update stats if loaded
+            } catch (error) {
+                actionDiv.innerHTML = `<div class="message error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polytechnic Library System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏫 Polytechnic Library System</h1>
+            <p>Welcome to the Digital Library Management System</p>
+        </div>
+
+        <div class="nav">
+            <a href="index.html">Home</a>
+            <a href="register.html">Register</a>
+            <a href="login.html">Login</a>
+            <a href="books.html">Books</a>
+            <a href="admin.html">Admin Panel</a>
+        </div>
+
+        <div class="card">
+            <h2>Welcome to Polytechnic Library</h2>
+            <p>This is a digital library management system for the Polytechnic. Here you can:</p>
+            <ul style="margin: 15px 0; padding-left: 20px;">
+                <li><strong>Students/Members:</strong> Register, login, and browse available books</li>
+                <li><strong>Librarians:</strong> Manage book availability and view all system features</li>
+            </ul>
+            
+            <h3>Getting Started:</h3>
+            <ol style="margin: 15px 0; padding-left: 20px;">
+                <li>If you're new, <a href="register.html">register an account</a></li>
+                <li>If you have an account, <a href="login.html">login here</a></li>
+                <li>Once logged in, you can <a href="books.html">browse books</a></li>
+                <li>Librarians can access the <a href="admin.html">admin panel</a></li>
+            </ol>
+
+            <h3>Test Accounts:</h3>
+            <p><strong>Username:</strong> student1 | <strong>Password:</strong> password123 | <strong>Role:</strong> Member</p>
+            <p><strong>Username:</strong> admin | <strong>Password:</strong> password123 | <strong>Role:</strong> Librarian</p>
+        </div>
+
+        <div class="card">
+            <h3>API Status</h3>
+            <button onclick="checkAPIStatus()">Check API Status</button>
+            <div id="apiStatus"></div>
+        </div>
+    </div>
+
+    <script>
+        async function checkAPIStatus() {
+            const statusDiv = document.getElementById('apiStatus');
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                statusDiv.innerHTML = `<div class="message success">✅ ${data.message}</div>`;
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="message error">❌ API is not responding: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
