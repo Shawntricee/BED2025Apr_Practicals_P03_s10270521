@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Books List</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 20px;
+        background-color: #f5f5f5;
+      }
+      .header {
+        background-color: #007bff;
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .controls {
+        margin-bottom: 20px;
+      }
+      .btn {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        margin-right: 10px;
+        font-weight: bold;
+      }
+      .btn-primary {
+        background-color: #007bff;
+        color: white;
+      }
+      .btn-success {
+        background-color: #28a745;
+        color: white;
+      }
+      .btn-warning {
+        background-color: #ffc107;
+        color: black;
+      }
+      .btn-danger {
+        background-color: #dc3545;
+        color: white;
+      }
+      .btn:hover {
+        opacity: 0.8;
+      }
+      #booksList {
+        margin-top: 20px;
+      }
+      .book-item {
+        background-color: white;
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .book-item h3 {
+        margin-top: 0;
+        color: #333;
+      }
+      .book-item button {
+        margin-right: 5px;
+      }
+      #message {
+        margin-top: 15px;
+        font-weight: bold;
+        padding: 12px;
+        border-radius: 4px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Books Management System</h1>
+      <p>Manage your book collection with full CRUD operations</p>
+    </div>
+
+    <div class="controls">
+      <a href="create.html" class="btn btn-success">Add New Book</a>
+      <button id="fetchBooksBtn" class="btn btn-primary">Refresh Books List</button>
+      <a href="/api-docs" class="btn btn-warning" target="_blank">View API Documentation</a>
+    </div>
+
+    <div id="message"></div>
+    <div id="booksList">Loading books...</div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
